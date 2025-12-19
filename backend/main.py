@@ -1,38 +1,35 @@
-from fastapi import FastAPI
-from fastapi.responses import HTMLResponse
+from fastapi import FastAPI, Request
+from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel
 import os
-from groq import Groq
 
 app = FastAPI()
 
-# Serve frontend files
-app.mount("/static", StaticFiles(directory="static"), name="static")
+# Serve static files
+app.mount("/static", StaticFiles(directory="backend/static"), name="static")
 
-# Groq client
-client = Groq(api_key=os.getenv("GROQ_API_KEY"))
-
-class ChatRequest(BaseModel):
-    message: str
-
-# Home page
+# HOME PAGE
 @app.get("/", response_class=HTMLResponse)
-def home():
-    with open("static/index.html", "r", encoding="utf-8") as f:
+async def home():
+    with open("backend/static/index.html", "r") as f:
         return f.read()
 
-# Chat UI
+# CHAT PAGE
 @app.get("/chat-ui", response_class=HTMLResponse)
-def chat_ui():
-    with open("static/chat.html", "r", encoding="utf-8") as f:
+async def chat_ui():
+    with open("backend/static/chat.html", "r") as f:
         return f.read()
 
-# Chat API
+# CHAT API
 @app.post("/chat")
-def chat(req: ChatRequest):
-    completion = client.chat.completions.create(
-        model="llama3-8b-8192",
-        messages=[{"role": "user", "content": req.message}]
-    )
-    return {"reply": completion.choices[0].message.content}
+async def chat(data: dict):
+    msg = data.get("message", "")
+    return {
+        "reply": f"Hello! I am COCO 🤖. You said: {msg}",
+        "mode_used": "chat"
+    }
+
+# RESET CHAT
+@app.post("/reset")
+async def reset():
+    return {"status": "cleared"}

@@ -4,59 +4,56 @@
   <title>COCO Chat</title>
   <style>
     body {
-      background: black;
-      color: #00ff99;
+      background:black;
+      color:#00ff99;
       font-family: monospace;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
+      padding:20px;
     }
-    .chat {
-      width: 400px;
-      border: 2px solid #00ff99;
-      padding: 15px;
-      box-shadow: 0 0 20px #00ff99;
-    }
-    #messages {
-      height: 300px;
-      overflow-y: auto;
-      margin-bottom: 10px;
+    #chat {
+      border:2px solid #00ff99;
+      padding:10px;
+      height:300px;
+      overflow-y:auto;
+      margin-bottom:10px;
     }
     input {
-      width: 100%;
-      padding: 10px;
-      background: black;
-      color: #00ff99;
-      border: 1px solid #00ff99;
+      width:80%;
+      padding:10px;
+      background:black;
+      color:#00ff99;
+      border:1px solid #00ff99;
+    }
+    button {
+      padding:10px;
+      background:#00ff99;
+      border:none;
+      cursor:pointer;
     }
   </style>
 </head>
 <body>
-  <div class="chat">
-    <h3>COCO</h3>
-    <div id="messages"></div>
-    <input id="input" placeholder="Type here..." onkeydown="send(event)">
-  </div>
 
-  <script>
-    async function send(e) {
-      if (e.key !== "Enter") return;
-      const input = document.getElementById("input");
-      const msg = input.value;
-      input.value = "";
+<h2>COCO 🤖</h2>
 
-      document.getElementById("messages").innerHTML += "<p>> " + msg + "</p>";
+<div id="chat"></div>
 
-      const res = await fetch("/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: msg })
-      });
+<input id="msg" placeholder="Type here..." />
+<button onclick="send()">Send</button>
 
-      const data = await res.json();
-      document.getElementById("messages").innerHTML += "<p>COCO: " + data.reply + "</p>";
-    }
-  </script>
+<script>
+async function send(){
+  let msg = document.getElementById("msg").value;
+  let res = await fetch("/chat", {
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body:JSON.stringify({message:msg})
+  });
+  let data = await res.json();
+  document.getElementById("chat").innerHTML +=
+    "<p><b>You:</b> "+msg+"</p><p><b>COCO:</b> "+data.reply+"</p>";
+  document.getElementById("msg").value="";
+}
+</script>
+
 </body>
 </html>
