@@ -1,15 +1,16 @@
 from fastapi import FastAPI
-from pydantic import BaseModel
-import os
-from groq import Groq
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
+from pydantic import BaseModel
+from groq import Groq
+import os
 
 app = FastAPI()
 
+# Groq client (REAL AI)
 client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
-# Serve frontend
+# Serve static files
 app.mount("/static", StaticFiles(directory="backend/static"), name="static")
 
 @app.get("/")
@@ -31,15 +32,19 @@ def chat(req: ChatRequest):
             {
                 "role": "system",
                 "content": (
-                    "You are COCO, a futuristic hacker-style AI assistant. "
-                    "You NEVER repeat the user's message. "
-                    "You respond intelligently, creatively, and confidently. "
-                    "Your tone is modern, sharp, and tech-savvy."
+                    "You are COCO_AI, a futuristic hacker-style AI. "
+                    "You answer intelligently, creatively, and confidently. "
+                    "You NEVER repeat the user's input. "
+                    "You speak like a next-generation AI for youth."
                 )
             },
-            {"role": "user", "content": req.message}
+            {
+                "role": "user",
+                "content": req.message
+            }
         ],
-        temperature=0.9
+        temperature=0.85,
+        max_tokens=300
     )
 
     return {
