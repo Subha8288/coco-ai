@@ -1,43 +1,39 @@
 from fastapi import FastAPI
-from fastapi.responses import FileResponse
-from fastapi.staticfiles import StaticFiles
-from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import os
+from groq import Groq
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 
 app = FastAPI()
 
-# ---------- CORS ----------
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
-# ---------- STATIC FILES ----------
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-STATIC_DIR = os.path.join(BASE_DIR, "static")
+# Serve frontend
+app.mount("/static", StaticFiles(directory="backend/static"), name="static")
 
-app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
-
-# ---------- HOME PAGE ----------
 @app.get("/")
 def home():
-    return FileResponse(os.path.join(STATIC_DIR, "index.html"))
+    return FileResponse("backend/static/index.html")
 
-# ---------- CHAT PAGE ----------
 @app.get("/chat-ui")
 def chat_ui():
-    return FileResponse(os.path.join(STATIC_DIR, "chat.html"))
+    return FileResponse("backend/static/chat.html")
 
-# ---------- API ----------
 class ChatRequest(BaseModel):
     message: str
 
 @app.post("/chat")
 def chat(req: ChatRequest):
+    response = client.chat.completions.create(
+        model="llama3-8b-8192",
+        messages=[
+            {"role": "system", "content": "You are COCO, a cool hacker-style AI assistant for youth."},
+            {"role": "user", "content": req.message}
+        ],
+        temperature=0.7
+    )
+
     return {
-        "reply": f"Hello! You said: {req.message}",
-        "mode_used": "chat"
+        "reply": response.choices[0].message.content
     }
