@@ -1,12 +1,13 @@
 from fastapi import FastAPI
-from fastapi.responses import HTMLResponse
+from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+import os
 
 app = FastAPI()
 
-# CORS (important for frontend)
+# ---------- CORS ----------
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -14,28 +15,23 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Serve static files
-app.mount("/static", StaticFiles(directory="backend/static"), name="static")
+# ---------- STATIC FILES ----------
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+STATIC_DIR = os.path.join(BASE_DIR, "static")
 
-# ======================
-# HOME PAGE (/)
-# ======================
-@app.get("/", response_class=HTMLResponse)
+app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+
+# ---------- HOME PAGE ----------
+@app.get("/")
 def home():
-    with open("backend/static/index.html", "r", encoding="utf-8") as f:
-        return f.read()
+    return FileResponse(os.path.join(STATIC_DIR, "index.html"))
 
-# ======================
-# CHAT UI (/chat-ui)
-# ======================
-@app.get("/chat-ui", response_class=HTMLResponse)
+# ---------- CHAT PAGE ----------
+@app.get("/chat-ui")
 def chat_ui():
-    with open("backend/static/chat.html", "r", encoding="utf-8") as f:
-        return f.read()
+    return FileResponse(os.path.join(STATIC_DIR, "chat.html"))
 
-# ======================
-# CHAT API
-# ======================
+# ---------- API ----------
 class ChatRequest(BaseModel):
     message: str
 
