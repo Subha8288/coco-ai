@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>COCO Chat</title>
+  <style>
+    body {
+      background: black;
+      color: #00ff99;
+      font-family: monospace;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .chat {
+      width: 400px;
+      border: 2px solid #00ff99;
+      padding: 15px;
+      box-shadow: 0 0 20px #00ff99;
+    }
+    #messages {
+      height: 300px;
+      overflow-y: auto;
+      margin-bottom: 10px;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      background: black;
+      color: #00ff99;
+      border: 1px solid #00ff99;
+    }
+  </style>
+</head>
+<body>
+  <div class="chat">
+    <h3>COCO</h3>
+    <div id="messages"></div>
+    <input id="input" placeholder="Type here..." onkeydown="send(event)">
+  </div>
+
+  <script>
+    async function send(e) {
+      if (e.key !== "Enter") return;
+      const input = document.getElementById("input");
+      const msg = input.value;
+      input.value = "";
+
+      document.getElementById("messages").innerHTML += "<p>> " + msg + "</p>";
+
+      const res = await fetch("/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: msg })
+      });
+
+      const data = await res.json();
+      document.getElementById("messages").innerHTML += "<p>COCO: " + data.reply + "</p>";
+    }
+  </script>
+</body>
+</html>
