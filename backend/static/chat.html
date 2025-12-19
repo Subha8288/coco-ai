@@ -1,59 +1,129 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>COCO Chat</title>
-  <style>
-    body {
-      background:black;
-      color:#00ff99;
-      font-family: monospace;
-      padding:20px;
-    }
-    #chat {
-      border:2px solid #00ff99;
-      padding:10px;
-      height:300px;
-      overflow-y:auto;
-      margin-bottom:10px;
-    }
-    input {
-      width:80%;
-      padding:10px;
-      background:black;
-      color:#00ff99;
-      border:1px solid #00ff99;
-    }
-    button {
-      padding:10px;
-      background:#00ff99;
-      border:none;
-      cursor:pointer;
-    }
-  </style>
+<meta charset="UTF-8" />
+<title>COCO Chat</title>
+
+<style>
+body {
+  margin: 0;
+  background: black;
+  font-family: monospace;
+  color: #00ff99;
+}
+
+.container {
+  width: 380px;
+  height: 520px;
+  margin: 80px auto;
+  border: 2px solid #00ff99;
+  box-shadow: 0 0 25px #00ff99;
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  text-align: center;
+  padding: 10px;
+  border-bottom: 1px solid #00ff99;
+  font-weight: bold;
+}
+
+.chat-box {
+  flex: 1;
+  padding: 10px;
+  overflow-y: auto;
+  font-size: 14px;
+}
+
+.msg-user {
+  color: #00ffff;
+  margin-bottom: 6px;
+}
+
+.msg-bot {
+  color: #00ff99;
+  margin-bottom: 12px;
+}
+
+.input-area {
+  display: flex;
+  border-top: 1px solid #00ff99;
+}
+
+input {
+  flex: 1;
+  background: black;
+  border: none;
+  padding: 10px;
+  color: #00ff99;
+  outline: none;
+}
+
+button {
+  background: black;
+  border: none;
+  color: #00ff99;
+  padding: 10px 15px;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #00ff99;
+  color: black;
+}
+</style>
 </head>
+
 <body>
+<div class="container">
+  <div class="header">COCO</div>
 
-<h2>COCO 🤖</h2>
+  <div class="chat-box" id="chat"></div>
 
-<div id="chat"></div>
-
-<input id="msg" placeholder="Type here..." />
-<button onclick="send()">Send</button>
+  <div class="input-area">
+    <input id="input" placeholder="Type here..." />
+    <button onclick="send()">SEND</button>
+  </div>
+</div>
 
 <script>
-async function send(){
-  let msg = document.getElementById("msg").value;
-  let res = await fetch("/chat", {
-    method:"POST",
-    headers:{ "Content-Type":"application/json" },
-    body:JSON.stringify({message:msg})
-  });
-  let data = await res.json();
-  document.getElementById("chat").innerHTML +=
-    "<p><b>You:</b> "+msg+"</p><p><b>COCO:</b> "+data.reply+"</p>";
-  document.getElementById("msg").value="";
-}
-</script>
+const chatBox = document.getElementById("chat");
+const input = document.getElementById("input");
 
+function addMessage(text, cls) {
+  const div = document.createElement("div");
+  div.className = cls;
+  div.innerText = text;
+  chatBox.appendChild(div);
+  chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+async function send() {
+  const msg = input.value.trim();
+  if (!msg) return;
+
+  addMessage("> " + msg, "msg-user");
+  input.value = "";
+
+  try {
+    const res = await fetch("/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: msg })
+    });
+
+    const data = await res.json();
+    addMessage("COCO: " + data.reply, "msg-bot");
+
+  } catch (e) {
+    addMessage("COCO: Connection error", "msg-bot");
+  }
+}
+
+input.addEventListener("keydown", e => {
+  if (e.key === "Enter") send();
+});
+</script>
 </body>
 </html>
