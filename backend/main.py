@@ -28,12 +28,20 @@ def chat(req: ChatRequest):
     response = client.chat.completions.create(
         model="llama3-8b-8192",
         messages=[
-            {"role": "system", "content": "You are COCO, a cool hacker-style AI assistant for youth."},
+            {
+                "role": "system",
+                "content": (
+                    "You are COCO, a futuristic hacker-style AI assistant. "
+                    "You NEVER repeat the user's message. "
+                    "You respond intelligently, creatively, and confidently. "
+                    "Your tone is modern, sharp, and tech-savvy."
+                )
+            },
             {"role": "user", "content": req.message}
         ],
-        temperature=0.7
+        temperature=0.9
     )
 
     return {
-        "reply": response.choices[0].message.content
+        "reply": response.choices[0].message.content.strip()
     }
